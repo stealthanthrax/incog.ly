@@ -4,7 +4,7 @@ A simple demo app for webrtc audio
 # how to install/run/test
 
 ~~~~
-cd webrtc-audio-demo
+cd into [folder]
 npm install
 npm start
 ~~~~
