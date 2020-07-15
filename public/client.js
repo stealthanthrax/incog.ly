@@ -61,12 +61,13 @@ socket.on('created', function (room) {
         var biquadFilter = audioCtx.createBiquadFilter();
         biquadFilter.type = "lowshelf";
         biquadFilter.frequency.value = 2000;
-        biquadFilter.gain.value = 2500;
+        biquadFilter.gain.value = 5500;
 
         source.connect(biquadFilter);
         biquadFilter.connect(audioCtx.destination);
 
-        addLocalStream(source);
+        console.log('source', source.mediaStream);
+        addLocalStream(source.mediaStream); //pass 'stream' into this function call to remove the modulation
         isCaller = true;
     }).catch(function (err) {
         console.log('An error ocurred when accessing media devices');
