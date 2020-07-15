@@ -2,7 +2,7 @@
 var divSelectRoom = document.getElementById("selectRoom");
 var divConferenceRoom = document.getElementById("conferenceRoom");
 var btnGoBoth = document.getElementById("goBoth");
-var btnGoVideoOnly = document.getElementById("goVideoOnly");
+var btnGoAudioOnly = document.getElementById("goAudioOnly");
 var localVideo = document.getElementById("localVideo");
 var remoteVideo = document.getElementById("remoteVideo");
 var btnMute = document.getElementById("mute");
@@ -29,13 +29,13 @@ var isCaller;
 var socket = io();
 
 btnGoBoth.onclick = () => initiateCall(true);
-btnGoVideoOnly.onclick = () => initiateCall(false);
+btnGoAudioOnly.onclick = () => initiateCall(false);
 btnMute.onclick = toggleAudio;
 
-function initiateCall(audio) {
+function initiateCall(video) {
     streamConstraints = {
-        video: true,
-        audio: audio
+        video: video,
+        audio: true
     }
     socket.emit('create or join', roomNumber);
     divSelectRoom.style = "display: none;";
@@ -44,8 +44,29 @@ function initiateCall(audio) {
 
 // message handlers
 socket.on('created', function (room) {
+    const synth = new Tone.Synth().toMaster();
+
+//play a middle 'C' for the duration of an 8th note
+    synth.triggerAttackRelease("C4", "8n");
+
+    console.log(synth);
     navigator.mediaDevices.getUserMedia(streamConstraints).then(function (stream) {
-        addLocalStream(stream);
+        console.log('created');
+        console.log(stream);
+        console.log(stream.getAudioTracks());
+
+        var audioCtx = new AudioContext();
+        var source = audioCtx.createMediaStreamSource(stream);
+        console.log('source', source.mediaStream);
+        var biquadFilter = audioCtx.createBiquadFilter();
+        biquadFilter.type = "lowshelf";
+        biquadFilter.frequency.value = 2000;
+        biquadFilter.gain.value = 2500;
+
+        source.connect(biquadFilter);
+        biquadFilter.connect(audioCtx.destination);
+
+        addLocalStream(source);
         isCaller = true;
     }).catch(function (err) {
         console.log('An error ocurred when accessing media devices');
@@ -114,7 +135,7 @@ function onIceCandidate(event) {
 }
 
 function onAddStream(event) {
-    remoteVideo.src = URL.createObjectURL(event.stream);
+    remoteVideo.srcObject = event.stream;
     remoteStream = event.stream;
     if (remoteStream.getAudioTracks().length > 0) {
         addAudioEvent('Remote user is sending Audio');
@@ -144,7 +165,7 @@ function setLocalAndAnswer(sessionDescription) {
 //utility functions
 function addLocalStream(stream) {
     localStream = stream;
-    localVideo.src = URL.createObjectURL(stream);
+    localVideo.srcObject = stream;
 
     if (stream.getAudioTracks().length > 0) {
         btnMute.style = "display: block";
@@ -160,6 +181,9 @@ function createPeerConnection() {
 
 function toggleAudio() {
     localStream.getAudioTracks()[0].enabled = !localStream.getAudioTracks()[0].enabled
+    console.log('the beginning of the stream');
+    console.log(localStream.getAudioTracks())
+    console.log('after stream');
     socket.emit('toggleAudio', {
         type: 'toggleAudio',
         room: roomNumber,
