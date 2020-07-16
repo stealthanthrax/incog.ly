@@ -126,7 +126,7 @@ class MediaBridge extends Component {
         console.log('onaddstream', e)
         
         let audioCtx = new AudioContext();
-        let source = audioCtx.createMediaStreamSource(stream);
+        let source = audioCtx.createMediaStreamSource(e.stream);
         console.log('source');
         console.log(source);
         let pitchShift = PitchShift(audioCtx);
@@ -137,10 +137,10 @@ class MediaBridge extends Component {
         pitchShift.wet.value = 1;
         pitchShift.dry.value = 0.5;
         console.log('source down');
-        //console.log(source.mediaStream);
+        console.log(source.mediaStream);
         console.log("eeeeeee", e.stream);
-        this.remoteStream = e.stream;
-        this.remoteVideo.srcObject = this.remoteStream = e.stream;
+        this.remoteStream = source.mediaStream;
+        this.remoteVideo.srcObject = this.remoteStream = source.mediaStream;
         this.setState({bridge: 'established'});
     };
     this.pc.ondatachannel = e => {
