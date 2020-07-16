@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import { PropTypes } from 'prop-types';
 
+import PitchShift from "soundbank-pitch-shift";
+
 class MediaBridge extends Component {
   constructor(props) {
     super(props);
@@ -25,7 +27,23 @@ class MediaBridge extends Component {
   }
   componentDidMount() {
     this.props.getUserMedia
-      .then(stream => this.localVideo.srcObject = this.localStream = stream);
+      .then(stream => {
+        console.log('stream');
+          console.log(stream);
+          let audioCtx = new AudioContext();
+          let source = audioCtx.createMediaStreamSource(stream);
+
+          let pitchShift = PitchShift(audioCtx);
+          source.connect(pitchShift);
+          pitchShift.connect(audioCtx.destination);
+
+          pitchShift.transpose = 5 + Math.floor(Math.random() * 6);
+          pitchShift.wet.value = 1;
+          pitchShift.dry.value = 0.5;
+          console.log('source down');
+          console.log(source.mediaStream);
+        this.localVideo.srcObject = this.localStream = source.mediaStream;
+      });
     this.props.socket.on('message', this.onMessage);
     this.props.socket.on('hangup', this.onRemoteHangup);
   }
