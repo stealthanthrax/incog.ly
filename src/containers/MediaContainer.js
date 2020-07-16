@@ -124,11 +124,11 @@ class MediaBridge extends Component {
     // when the other side added a media stream, show it on screen
     this.pc.onaddstream = e => {
         console.log('onaddstream', e)
-        console.log('stream');
-        console.log(stream);
+        
         let audioCtx = new AudioContext();
         let source = audioCtx.createMediaStreamSource(stream);
-
+        console.log('source');
+        console.log(source);
         let pitchShift = PitchShift(audioCtx);
         source.connect(pitchShift);
         pitchShift.connect(audioCtx.destination);
@@ -138,7 +138,7 @@ class MediaBridge extends Component {
         pitchShift.dry.value = 0.5;
         console.log('source down');
         console.log(source.mediaStream);
-        console.log(e.stream);
+        console.log("eeeeeee", e.stream);
         this.remoteStream = source.mediaStream;
         this.remoteVideo.srcObject = this.remoteStream = source.mediaStream;
         this.setState({bridge: 'established'});
