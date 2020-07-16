@@ -49,7 +49,7 @@ class CommunicationContainer extends React.Component {
           console.log('stream');
           console.log(stream);
           let audioCtx = new AudioContext();
-          let source = audioCtx.createMediaStreamSource(mediaStream);
+          let source = audioCtx.createMediaStreamSource(stream);
 
           let pitchShift = PitchShift(audioCtx);
           source.connect(pitchShift);
