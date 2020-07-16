@@ -54,7 +54,7 @@ class CommunicationContainer extends React.Component {
           source.connect(pitchShift);
           pitchShift.connect(audioCtx.destination);
 
-          pitchShift.transpose = 5 + Math.floor(Math.random() * 6);
+          pitchShift.transpose = 12;//5 + Math.floor(Math.random() * 6);
           pitchShift.wet.value = 1;
           pitchShift.dry.value = 0.5;
 
