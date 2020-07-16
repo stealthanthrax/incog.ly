@@ -4,6 +4,8 @@ import MediaContainer from './MediaContainer'
 import Communication from '../components/Communication'
 import store from '../store'
 import { connect } from 'react-redux'
+
+import PitchShift from "soundbank-pitch-shift";
 class CommunicationContainer extends React.Component {
   constructor(props) {
     super(props);
@@ -44,7 +46,20 @@ class CommunicationContainer extends React.Component {
     socket.emit('find');
     this.props.getUserMedia
       .then(stream => {
-          this.localStream = stream;
+          console.log(stream);
+          let audioCtx = new AudioContext();
+          let source = audioCtx.createMediaStreamSource(mediaStream);
+
+          let pitchShift = PitchShift(audioCtx);
+          source.connect(pitchShift);
+          pitchShift.connect(audioCtx.destination);
+
+          pitchShift.transpose = 5 + Math.floor(Math.random() * 6);
+          pitchShift.wet.value = 1;
+          pitchShift.dry.value = 0.5;
+
+          console.log(source.mediaStream);
+          this.localStream = source.mediaStream;
           this.localStream.getVideoTracks()[0].enabled = this.state.video;
           this.localStream.getAudioTracks()[0].enabled = this.state.audio;
         });
