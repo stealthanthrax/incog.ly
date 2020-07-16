@@ -28,21 +28,7 @@ class MediaBridge extends Component {
   componentDidMount() {
     this.props.getUserMedia
       .then(stream => {
-        console.log('stream');
-          console.log(stream);
-          let audioCtx = new AudioContext();
-          let source = audioCtx.createMediaStreamSource(stream);
-
-          let pitchShift = PitchShift(audioCtx);
-          source.connect(pitchShift);
-          pitchShift.connect(audioCtx.destination);
-
-          pitchShift.transpose = 5 + Math.floor(Math.random() * 6);
-          pitchShift.wet.value = 1;
-          pitchShift.dry.value = 0.5;
-          console.log('source down');
-          console.log(source.mediaStream);
-        this.localVideo.srcObject = this.localStream = source.mediaStream;
+        this.localVideo.srcObject = this.localStream = stream;
       });
     this.props.socket.on('message', this.onMessage);
     this.props.socket.on('hangup', this.onRemoteHangup);
@@ -137,9 +123,24 @@ class MediaBridge extends Component {
     };
     // when the other side added a media stream, show it on screen
     this.pc.onaddstream = e => {
-        console.log('onaddstream', e) 
-        this.remoteStream = e.stream;
-        this.remoteVideo.srcObject = this.remoteStream = e.stream;
+        console.log('onaddstream', e)
+        console.log('stream');
+        console.log(stream);
+        let audioCtx = new AudioContext();
+        let source = audioCtx.createMediaStreamSource(stream);
+
+        let pitchShift = PitchShift(audioCtx);
+        source.connect(pitchShift);
+        pitchShift.connect(audioCtx.destination);
+
+        pitchShift.transpose = 5 + Math.floor(Math.random() * 6);
+        pitchShift.wet.value = 1;
+        pitchShift.dry.value = 0.5;
+        console.log('source down');
+        console.log(source.mediaStream);
+        console.log(e.stream);
+        this.remoteStream = source.mediaStream;
+        this.remoteVideo.srcObject = this.remoteStream = source.mediaStream;
         this.setState({bridge: 'established'});
     };
     this.pc.ondatachannel = e => {
